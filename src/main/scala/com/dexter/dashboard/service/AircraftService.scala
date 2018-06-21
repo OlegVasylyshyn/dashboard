@@ -16,10 +16,9 @@ private class Engine extends AircraftService {
   private var aircrafts = new ArrayBuffer[Aircraft](10000)
 
   def update() = {
-    downloader.update(aircrafts)
+    downloader.update()
   }
 
-  // always empty... why?
   def getAircrafts() : ArrayBuffer[Aircraft] = aircrafts
 }
 

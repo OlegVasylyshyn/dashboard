@@ -21,7 +21,7 @@ object GsonParser {
   val system = ActorSystem("LifeCycleSystem")
   val log = Logging(system, classOf[Downloader])
 
-  def update(source: Source[String, Any], aircrafts: ArrayBuffer[Aircraft]) : ArrayBuffer[Aircraft] = {
+  def update(source: Source[String, Any])  = {
 
     implicit val system: ActorSystem = ActorSystem()
     implicit val executionContext: ExecutionContextExecutor = system.dispatcher
@@ -48,11 +48,9 @@ object GsonParser {
           service.getAircrafts += aircraft
         })
 
-        // Here we see that we get list all aircraft ... but in AircraftService this list would be empty... why?
         log.info("Was parsed next amount of aircrafts - {}", service.getAircrafts().size)
       })
 
-    aircrafts
   }
 
 }

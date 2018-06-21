@@ -6,9 +6,7 @@ import akka.http.scaladsl.Http
 import akka.http.scaladsl.model._
 import akka.stream.ActorMaterializer
 import com.dexter.dashboard.json.GsonParser
-import com.dexter.dashboard.model.Aircraft
 
-import scala.collection.mutable.ArrayBuffer
 import scala.concurrent.{ExecutionContextExecutor, Future}
 
 class Downloader {
@@ -16,7 +14,7 @@ class Downloader {
   val system = ActorSystem("LifeCycleSystem")
   val log = Logging(system, classOf[Downloader])
 
-  def update(aircrafts: ArrayBuffer[Aircraft]) = {
+  def update() = {
 
     implicit val system: ActorSystem = ActorSystem()
     implicit val executionContext: ExecutionContextExecutor = system.dispatcher
@@ -26,8 +24,8 @@ class Downloader {
 
     response
         .map(res => res.entity.dataBytes.map(b => b.utf8String))
-        .map(source => GsonParser.update(source, aircrafts))
-        .onComplete(e => log.info("Was downloaded new aircrafts - {}", e.get))
+        .map(source => GsonParser.update(source))
+        .onComplete(e => log.info("Was downloaded new updates for aircrafts"))
 
     response.failed.foreach(e => log.error(e.toString))
 

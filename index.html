@@ -6,14 +6,15 @@
 </head>
 <body>
 
-<h1>Getting server updates</h1>
+<h1>Getting server updates<span id="title"></span></h1>
 <div id="result"></div>
 
 <script>
     if(typeof(EventSource) !== "undefined") {
         var source = new EventSource("http://localhost:8080/events");
         source.onmessage = function(event) {
-            document.getElementById("result").innerHTML += event.data + "<br>";
+            result.innerHTML = event.data + "<br>";
+            title.innerHTML = " " + new Date();
         };
     } else {
         document.getElementById("result").innerHTML = "Sorry, your browser does not support server-sent events...";
