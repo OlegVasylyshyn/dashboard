@@ -12,7 +12,7 @@ import akka.http.scaladsl.server.Route
 import akka.stream.scaladsl.Source
 import ch.megard.akka.http.cors.scaladsl.CorsDirectives._
 import com.dexter.dashboard.Run.system
-import com.dexter.dashboard.model.Aircraft
+import com.dexter.dashboard.model.{Aircraft, DashboardResponse}
 import com.dexter.dashboard.service.{AircraftService, Downloader}
 import io.circe._
 import io.circe.generic.semiauto._
@@ -33,6 +33,9 @@ object MainRoute {
     implicit val decodeAircraft: Encoder[Aircraft] = deriveEncoder[Aircraft]
     implicit val decodeLocalTimet: Encoder[LocalTime] = Encoder.instance(time => Json.fromString(time.format(DateTimeFormatter.ISO_INSTANT)))
 
+    // Here will be normal encoder
+    implicit val decodeDashboard: Encoder[DashboardResponse] = Encoder.instance(d => Json.fromString(d.toString))
+
     path("events") {
       get {
         complete {
@@ -40,10 +43,15 @@ object MainRoute {
             .tick(1.seconds, 5.seconds, NotUsed)
             .map(_ => service.getAircrafts())
             .map(ac => {
-              log.info("Sending list of " + ac.size + " aircrafts");
+              log.info("Sending list of " + ac.size + " aircrafts")
               service.update()
-              ac.asJson })
-            .map(t => ServerSentEvent(t.toString()))
+              val dashboard = DashboardResponse(LocalTime.now(), ac.size)
+              log.info(s"Was created next object for response - $dashboard")
+              val json = dashboard.asJson
+              log.info("Json to response - " + json.toString())
+              json.toString()
+            })
+            .map(d => ServerSentEvent(d))
             .keepAlive(5.second, () => ServerSentEvent.heartbeat)
         }
       }
