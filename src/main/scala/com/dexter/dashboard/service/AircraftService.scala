@@ -5,20 +5,11 @@ import com.dexter.dashboard.model.Aircraft
 import scala.collection.mutable.ArrayBuffer
 
 trait AircraftService {
-
-  def update()
   def getAircrafts() : ArrayBuffer[Aircraft]
-
 }
 
 private class Engine extends AircraftService {
-  private val downloader: Downloader = new Downloader
   private var aircrafts = new ArrayBuffer[Aircraft](10000)
-
-  def update() = {
-    downloader.update()
-  }
-
   def getAircrafts() : ArrayBuffer[Aircraft] = aircrafts
 }
 

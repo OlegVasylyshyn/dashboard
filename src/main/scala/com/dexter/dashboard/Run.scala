@@ -5,18 +5,20 @@ import akka.event.Logging
 import akka.http.scaladsl.Http
 import akka.stream.ActorMaterializer
 import com.dexter.dashboard.route.MainRoute
-import com.dexter.dashboard.service.Downloader
+import com.dexter.dashboard.service.{AircraftService, Downloader}
 
 import scala.concurrent.ExecutionContextExecutor
 import scala.io.StdIn
 
 object Run extends App {
 
+  Downloader.update()
+
   implicit val system = ActorSystem("my-system")
   implicit val materializer: ActorMaterializer = ActorMaterializer()
   implicit val executionContext: ExecutionContextExecutor = system.dispatcher
 
-  val log = Logging(system, classOf[Downloader])
+  val log = Logging(system, classOf[AircraftService])
   val bindingFuture = Http().bindAndHandle(MainRoute.route, "localhost", 8080)
 
   log.info(s"Just enter http://localhost:8080/events \t.Press RETURN to stop...")

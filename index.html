@@ -13,7 +13,7 @@
     if(typeof(EventSource) !== "undefined") {
         var source = new EventSource("http://localhost:8080/events");
         source.onmessage = function(event) {
-            result.innerHTML += "Was downloaded - " + event.data + " updates<br>";
+            result.innerHTML = "Was downloaded - " + event.data + " updates<br>";
         };
     } else {
         document.getElementById("result").innerHTML = "Sorry, your browser does not support server-sent events...";
