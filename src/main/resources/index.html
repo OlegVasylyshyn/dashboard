@@ -10,9 +10,6 @@
 </head>
 <body>
 
-<!--<h1>Getting server updates</span></h1>-->
-<!--<div id="result"></div>-->
-
 <div class="container">
     <h2>Currently<span id="total"></span>aircrafts are in these cities</h2>
     <p>Time : <span id="time"></span></p>
@@ -58,13 +55,13 @@
             }
             total.innerHTML = " " + totalFlights + " ";
 
-            var d = new Date();
-            time.innerHTML = d.getFullYear() +
-                "-" + (d.getMonth() + 1) +
-                "-" + d.getDate() +
-                " " + d.getHours() +
-                ":" + (d.getMinutes() < 10 ? "0" + d.getMinutes() : d.getMinutes()) +
-                ":" + (d.getSeconds() < 10 ? "0" + d.getSeconds() : d.getSeconds());
+            const currentTime = new Date();
+            time.innerHTML = currentTime.getFullYear() +
+                "-" + (currentTime.getMonth() + 1) +
+                "-" + currentTime.getDate() +
+                " " + currentTime.getHours() +
+                ":" + (currentTime.getMinutes() < 10 ? "0" + currentTime.getMinutes() : currentTime.getMinutes()) +
+                ":" + (currentTime.getSeconds() < 10 ? "0" + currentTime.getSeconds() : currentTime.getSeconds());
         };
     } else {
         document.getElementById("result").innerHTML = "Sorry, your browser does not support server-sent events...";
