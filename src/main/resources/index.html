@@ -1,19 +1,70 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <title>Title</title>
+    <title>Dashboard</title>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
 </head>
 <body>
 
-<h1>Getting server updates</span></h1>
-<div id="result"></div>
+<!--<h1>Getting server updates</span></h1>-->
+<!--<div id="result"></div>-->
+
+<div class="container">
+    <h2>Currently<span id="total"></span>aircrafts are in these cities</h2>
+    <p>Time : <span id="time"></span></p>
+    <table class="table">
+        <thead>
+        <tr>
+            <th>City</th>
+            <th>Flight</th>
+        </tr>
+        </thead>
+        <tbody id="tableBody">
+
+        </tbody>
+    </table>
+</div>
 
 <script>
     if(typeof(EventSource) !== "undefined") {
         var source = new EventSource("http://localhost:8080/events");
         source.onmessage = function(event) {
-            result.innerHTML = "Was downloaded - " + event.data + " updates<br>";
+
+            // Vanilla JS ... why not? :P
+            const aircrafts = JSON.parse(event.data);
+
+            let totalFlights = 0;
+            tableBody.innerHTML = "";
+            for(const name in aircrafts) {
+
+                totalFlights += aircrafts[name].length;
+                aircrafts[name].forEach(ac => {
+                    const tr = document.createElement("tr");
+
+                    const cityTd = document.createElement("td");
+                    cityTd.innerHTML = name;
+                    tr.appendChild(cityTd);
+
+                    const icTd = document.createElement("td");
+                    icTd.innerHTML = ac.icao;
+                    tr.appendChild(icTd);
+
+                    tableBody.appendChild(tr);
+                });
+            }
+            total.innerHTML = " " + totalFlights + " ";
+
+            var d = new Date();
+            time.innerHTML = d.getFullYear() +
+                "-" + (d.getMonth() + 1) +
+                "-" + d.getDate() +
+                " " + d.getHours() +
+                ":" + (d.getMinutes() < 10 ? "0" + d.getMinutes() : d.getMinutes()) +
+                ":" + (d.getSeconds() < 10 ? "0" + d.getSeconds() : d.getSeconds());
         };
     } else {
         document.getElementById("result").innerHTML = "Sorry, your browser does not support server-sent events...";
