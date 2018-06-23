@@ -2,27 +2,28 @@ package com.dexter.dashboard.json
 
 import java.io.StringReader
 
-import akka.actor.{Actor, ActorSystem}
+import akka.actor.{Actor, ActorRef, ActorSystem, Props}
 import akka.event.Logging
 import akka.stream.ActorMaterializer
-import com.dexter.dashboard.model.ActorMessage.{Parse, Update}
+import com.dexter.dashboard.model.ActorMessage.{AircraftLocation, Parse}
 import com.dexter.dashboard.model.Aircraft
-import com.dexter.dashboard.service.AircraftService
+import com.dexter.dashboard.service.AircraftLocationService
 import com.google.gson.JsonParser
 import com.google.gson.stream.JsonReader
 
+import scala.collection.mutable.ArrayBuffer
 import scala.concurrent.ExecutionContextExecutor
 
 class GsonParser extends Actor  {
 
-  private val service: AircraftService = AircraftService.apply
-
-  val system = ActorSystem("LifeCycleSystem")
+  val system = ActorSystem("parser")
   val log = Logging(system, classOf[GsonParser])
 
-  def receive = {
+  val aircraftLocationService: ActorRef = system.actorOf(Props(new AircraftLocationService))
+
+  def receive: PartialFunction[Any, Unit] = {
     case Parse(source, downloader) => {
-//      implicit val system: ActorSystem = ActorSystem()
+
       implicit val executionContext: ExecutionContextExecutor = system.dispatcher
       implicit val materializer: ActorMaterializer = ActorMaterializer()
 
@@ -30,7 +31,7 @@ class GsonParser extends Actor  {
       source.runForeach(str => sb.append(str))
         .onComplete(emptySuccess => {
 
-          service.getAircrafts().clear
+          val aircrafts = new ArrayBuffer[Aircraft]
           val jsonParser = new JsonParser
 
           val reader = new JsonReader(new StringReader(sb.toString))
@@ -45,11 +46,11 @@ class GsonParser extends Actor  {
             val long = if(aircraftJson.getAsJsonPrimitive("Long") == null) 0 else aircraftJson.getAsJsonPrimitive("Long").getAsFloat
             val lat = if(aircraftJson.getAsJsonPrimitive("Lat") == null) 0 else aircraftJson.getAsJsonPrimitive("Lat").getAsFloat
             val aircraft = Aircraft(icao, alt, long, lat)
-            service.getAircrafts += aircraft
+            aircrafts += aircraft
           })
 
-          downloader ! Update
-          log.info("Was parsed next amount of aircrafts - {}", service.getAircrafts().size)
+          aircraftLocationService ! AircraftLocation(aircrafts, downloader)
+          log.info("Was parsed next amount of aircrafts - {}", aircrafts.size)
         })
     }
   }

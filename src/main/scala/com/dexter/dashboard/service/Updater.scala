@@ -10,26 +10,23 @@ import com.dexter.dashboard.model.ActorMessage.{Parse, Update}
 
 import scala.concurrent.{ExecutionContextExecutor, Future}
 
-object Downloader {
+object Updater {
 
-  implicit val system: ActorSystem = ActorSystem()
+  implicit val system: ActorSystem = ActorSystem("updater")
 
-  def update() = {
-
-    val parser = system.actorOf(Props(new GsonParser))
-    val downloader = system.actorOf(Props(new DownloaderActor(parser)))
-
+  def startUpdating(): Unit = {
+    val downloader = system.actorOf(Props(new DownloaderActor))
     downloader ! Update
-
   }
 
-  class DownloaderActor(parser: ActorRef) extends Actor {
+  class DownloaderActor extends Actor {
 
     val log = Logging(system, classOf[DownloaderActor])
+    val parser: ActorRef = system.actorOf(Props(new GsonParser))
 
-    def receive = {
+    def receive: PartialFunction[Any, Unit] = {
       case Update =>
-//        implicit val system: ActorSystem = ActorSystem()
+
         implicit val executionContext: ExecutionContextExecutor = system.dispatcher
         implicit val materializer: ActorMaterializer = ActorMaterializer()(system)
         val response: Future[HttpResponse] = Http()(system).singleRequest(HttpRequest(uri = "https://public-api.adsbexchange.com/VirtualRadar/AircraftList.json"))

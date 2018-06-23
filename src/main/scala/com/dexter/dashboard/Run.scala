@@ -5,14 +5,14 @@ import akka.event.Logging
 import akka.http.scaladsl.Http
 import akka.stream.ActorMaterializer
 import com.dexter.dashboard.route.MainRoute
-import com.dexter.dashboard.service.{AircraftService, Downloader}
+import com.dexter.dashboard.service.{AircraftService, Updater}
 
 import scala.concurrent.ExecutionContextExecutor
 import scala.io.StdIn
 
 object Run extends App {
 
-  Downloader.update()
+  Updater.startUpdating()
 
   implicit val system = ActorSystem("my-system")
   implicit val materializer: ActorMaterializer = ActorMaterializer()
