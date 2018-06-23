@@ -16,7 +16,7 @@ import io.circe.syntax._
 
 import scala.concurrent.duration._
 
-object MainRoute {
+object MainRouter {
 
   implicit val system: ActorSystem = ActorSystem("routing")
   val log = Logging(system, classOf[AircraftService])
@@ -27,7 +27,7 @@ object MainRoute {
     import akka.http.scaladsl.marshalling.sse.EventStreamMarshalling._
     implicit val decodeAircraft: Encoder[Aircraft] = deriveEncoder[Aircraft]
 
-    path("events") {
+    val events = path("events") {
       get {
         complete {
           Source
@@ -39,11 +39,22 @@ object MainRoute {
       }
     }
 
-    //    path("hello") {
-    //      get {
-    //        complete(HttpEntity(ContentTypes.`text/html(UTF-8)`, "<h1>Say hello to akka-http</h1>"))
-    //      }
-    //    }
+    // Just if I decide to add some css or js files for my index.html
+    val staticFile = path(Segment) { file =>
+      get {
+//        complete(HttpEntity(ContentTypes.`text/html(UTF-8)`, "<h1>Say hello to akka-http</h1>"))
+        getFromResource(file)
+      }
+    }
+
+    val startPage = path("") {
+      get {
+//        complete(HttpEntity(ContentTypes.`text/html(UTF-8)`, "<h1>Say hello to akka-http</h1>"))
+        getFromResource("index.html")
+      }
+    }
+
+    events ~ startPage ~ staticFile
   }
 
 }
